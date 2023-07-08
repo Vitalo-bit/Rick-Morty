@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "rick-and-morty-30970.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
