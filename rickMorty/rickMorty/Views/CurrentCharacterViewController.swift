@@ -7,10 +7,8 @@
 
 import UIKit
 
-///
+/// Текущий Сharacter
 final class CurrentCharacterViewController: UIViewController {
-
-    var delegate: CharacterDelegate?
     
     private let networkService = NetworkService()
     
@@ -40,7 +38,6 @@ final class CurrentCharacterViewController: UIViewController {
         speciecLabel.text = "Species: \(data.species)"
         genderLabel.text = "Sex: \(data.gender)"
         downloadImage(from: data.image)
-        delegate?.characterWasChanged(data)
     }
     
     private func downloadImage(from url: String) {

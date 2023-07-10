@@ -7,12 +7,9 @@
 
 import UIKit
 
-protocol CharacterDelegate {
-    func characterWasChanged(_ character: Character)
-}
-
-class CharactersViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-    
+/// Экран Сharacters
+final class CharactersViewController: UIViewController {
+    // MARK: - Private Properties
     private let identifier = "characterIdentifier"
     private let networkService = NetworkService()
     private var myTableView = UITableView()
@@ -22,6 +19,16 @@ class CharactersViewController: UIViewController, UITableViewDelegate, UITableVi
         }
     }
     
+    lazy var dataProvider: RickProvider = {
+        let managedContext = AppDelegate.sharedAppDelegate.coreDataStack.managedContext
+        let provider = RickProvider(with: managedContext, fetchedResultsControllerDelegate: self)
+        return provider
+    }()
+
+    
+    let char = [RickChar]()
+    
+    // MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationItem.title = "Rick & Morty"
@@ -30,24 +37,7 @@ class CharactersViewController: UIViewController, UITableViewDelegate, UITableVi
         
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let cellCharacter = characters[indexPath.row]
-        let openCell = CurrentCharacterViewController()
-        openCell.delegate = self
-        openCell.configure(data: cellCharacter)
-        navigationController?.present(openCell, animated: true)
-    }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return characters.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath)
-        cell.textLabel?.text = characters[indexPath.row].name
-        return cell
-    }
-
+    // MARK: - Private Methods
     private func createTable() {
         myTableView = UITableView(frame: view.bounds, style: .plain)
         myTableView.register(UITableViewCell.self, forCellReuseIdentifier: identifier)
@@ -64,14 +54,28 @@ class CharactersViewController: UIViewController, UITableViewDelegate, UITableVi
             case .failure(let failure):
                 print(failure.localizedDescription)
             }
-            
+            AppDelegate.sharedAppDelegate.coreDataStack.saveContext()
         }
     }
 }
 
-extension CharactersViewController: CharacterDelegate {
-    func characterWasChanged(_ character: Character) {
-        characters[0] = character
+/// UITableViewDelegate, UITableViewDataSource
+extension CharactersViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let cellCharacter = characters[indexPath.row]
+        let openCell = CurrentCharacterViewController()
+        openCell.configure(data: cellCharacter)
+        navigationController?.present(openCell, animated: true)
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        characters.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath)
+        cell.textLabel?.text = characters[indexPath.row].name
+        return cell
     }
 }
 
